@@ -1,209 +1,237 @@
+
 import json
+
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
-from scipy.sparse import data
 
 from .models import Person, Student
 
 
+def read_json(request):
+    try:
+        data = json.loads(request.body or "{}")
+
+        if not isinstance(data, dict):
+            return None
+
+        return data
+
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return None
+
+
+def serialize(obj):
+    return {
+        "id": obj.id,
+        "firstname": obj.firstname,
+        "lastname": obj.lastname,
+        "age": obj.age
+    }
+
+
+def validate_data(data, partial=False):
+    if data is None:
+        return False
+
+    allowed = {"firstname", "lastname", "age"}
+
+    if not data or not set(data).issubset(allowed):
+        return False
+
+    if not partial and not allowed.issubset(data):
+        return False
+
+    for field in ("firstname", "lastname"):
+        if field in data and not isinstance(data[field], str):
+            return False
+
+    if "age" in data:
+        if isinstance(data["age"], bool) or not isinstance(data["age"], int):
+            return False
+
+    return True
+
+
+def update_object(obj, data):
+    for field in ("firstname", "lastname", "age"):
+        if field in data:
+            setattr(obj, field, data[field])
+
+    obj.save()
+
+    return obj
+
+
+# =================================
+# PEOPLE API
+# =================================
+
+# GET
+def people_get(request):
+    if request.method != "GET":
+        return JsonResponse({"error": "GET only"}, status=405)
+
+    people = Person.objects.all()
+
+    return JsonResponse(
+        [serialize(person) for person in people],
+        safe=False
+    )
+
+
+# POST
 @csrf_exempt
 def people_api(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
 
-    if request.method == "POST":
+    data = read_json(request)
 
-        data = json.loads(request.body)
+    if not validate_data(data):
+        return JsonResponse({"error": "Invalid data"}, status=400)
 
-        person = Person.objects.create(
-            firstname=data["firstname"],
-            lastname=data["lastname"],
-            age=data["age"]
-        )
+    person = Person.objects.create(
+        firstname=data["firstname"],
+        lastname=data["lastname"],
+        age=data["age"]
+    )
 
-        return JsonResponse({
-            "id": person.id,
-            "firstname": person.firstname,
-            "lastname": person.lastname,
-            "age": person.age
-        })
+    return JsonResponse(serialize(person), status=201)
+
+
+# PUT
+@csrf_exempt
+def person_update(request, pk):
+    if request.method != "PUT":
+        return JsonResponse({"error": "PUT only"}, status=405)
+
+    data = read_json(request)
+
+    if not validate_data(data):
+        return JsonResponse({"error": "Invalid data"}, status=400)
+
+    person = get_object_or_404(Person, id=pk)
+
+    update_object(person, data)
+
+    return JsonResponse(serialize(person))
+
+
+# PATCH
+@csrf_exempt
+def person_change(request, pk):
+    if request.method != "PATCH":
+        return JsonResponse({"error": "PATCH only"}, status=405)
+
+    data = read_json(request)
+
+    if not validate_data(data, partial=True):
+        return JsonResponse({"error": "Invalid data"}, status=400)
+
+    person = get_object_or_404(Person, id=pk)
+
+    update_object(person, data)
+
+    return JsonResponse(serialize(person))
+
+
+# DELETE
+@csrf_exempt
+def person_delete(request, pk):
+    if request.method != "DELETE":
+        return JsonResponse({"error": "DELETE only"}, status=405)
+
+    person = get_object_or_404(Person, id=pk)
+    person.delete()
 
     return JsonResponse({
-        "error": "Only POST is allowed"
+        "message": "Person deleted successfully"
     })
 
 
-@csrf_exempt
-def person_update(request,id):
-    if request.method == "PUT":
+# =================================
+# STUDENT API
+# =================================
 
-        data = json.loads(request.body)
-
-        person = Person.objects.get(id=id)
-
-        person.firstname = data["firstname"]
-        person.lastname = data["lastname"]
-        person.age = data["age"]
-
-        person.save()
-
-        return JsonResponse({
-            "id": person.id,
-            "firstname": person.firstname,
-            "lastname": person.lastname,
-            "age": person.age
-        })
-
-    return JsonResponse({})
-
-@csrf_exempt
-def person_delete(request, id1):
-    if request.method == "DELETE":
-        person = Person.objects.get(id=id1)
-        person.delete()
-
-        return JsonResponse({})
-    return JsonResponse({})
-
-@csrf_exempt
-def person_change(request,id3):
-    if request.method == "PATCH":
-        data = json.loads(request.body)
-        person = Person.objects.get(id=id3)
-        person.firstname = data["firstname"]
-        person.lastname = data["lastname"]
-        person.age = data["age"]
-        person.save()
-        return JsonResponse({})
-
-@csrf_exempt
-def people_get(request):
-    if request.method == "GET":
-        people = Person.objects.all()
-
-        data = []
-
-        for person in people:
-            data.append({
-                "id": person.id,
-                "firstname": person.firstname,
-                "lastname": person.lastname,
-                "age": person.age
-            })
-
-        return JsonResponse(data, safe=False)
-
-
-
-
-
-
-
-
-
-
-
-
-
-# GET_Student
-@csrf_exempt
+# GET
 def Student_list(request):
-    if request.method == "GET":
-        a = Student.objects.all()
-        data = []
+    if request.method != "GET":
+        return JsonResponse({"error": "GET only"}, status=405)
 
-        for person in a:
-            data.append({
-                "id": person.id,
-                "firstname": person.firstname,
-                "lastname": person.lastname,
-                "age": person.age
-            })
+    students = Student.objects.all()
 
-        return JsonResponse(data, safe=False)
+    return JsonResponse(
+        [serialize(student) for student in students],
+        safe=False
+    )
 
 
 # POST
 @csrf_exempt
 def Student_create(request):
-    if request.method == "POST":
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
 
-        data = json.loads(request.body)
+    data = read_json(request)
 
-        person = Student.objects.create(
-            firstname=data["firstname"],
-            lastname=data["lastname"],
-            age=data["age"]
-        )
+    if not validate_data(data):
+        return JsonResponse({"error": "Invalid data"}, status=400)
 
-        return JsonResponse({
-            "id": person.id,
-            "firstname": person.firstname,
-            "lastname": person.lastname,
-            "age": person.age
-        })
+    student = Student.objects.create(
+        firstname=data["firstname"],
+        lastname=data["lastname"],
+        age=data["age"]
+    )
 
-    return JsonResponse({
-        "error": "Only POST is allowed"
-    })
+    return JsonResponse(serialize(student), status=201)
 
 
 # PUT
 @csrf_exempt
-def Student_update(request, id11):
-    if request.method == "PUT":
+def Student_update(request, pk):
+    if request.method != "PUT":
+        return JsonResponse({"error": "PUT only"}, status=405)
 
-        data = json.loads(request.body)
+    data = read_json(request)
 
-        person = Student.objects.get(id=id11)
+    if not validate_data(data):
+        return JsonResponse({"error": "Invalid data"}, status=400)
 
-        person.firstname = data["firstname"]
-        person.lastname = data["lastname"]
-        person.age = data["age"]
+    student = get_object_or_404(Student, id=pk)
 
-        person.save()
+    update_object(student, data)
 
-        return JsonResponse({
-            "id": person.id,
-            "firstname": person.firstname,
-            "lastname": person.lastname,
-            "age": person.age
-        })
-
-    return JsonResponse({})
+    return JsonResponse(serialize(student))
 
 
 # PATCH
 @csrf_exempt
-def Student_change(request, id12):
-    if request.method == "PATCH":
+def Student_change(request, pk):
+    if request.method != "PATCH":
+        return JsonResponse({"error": "PATCH only"}, status=405)
 
-        data = json.loads(request.body)
+    data = read_json(request)
 
-        person = Student.objects.get(id=id12)
+    if not validate_data(data, partial=True):
+        return JsonResponse({"error": "Invalid data"}, status=400)
 
-        person.firstname = data["firstname"]
-        person.lastname = data["lastname"]
-        person.age = data["age"]
+    student = get_object_or_404(Student, id=pk)
 
-        person.save()
+    update_object(student, data)
 
-        return JsonResponse({
-            "id": person.id,
-            "firstname": person.firstname,
-            "lastname": person.lastname,
-            "age": person.age
-        })
-
-    return JsonResponse({})
+    return JsonResponse(serialize(student))
 
 
 # DELETE
 @csrf_exempt
-def Student_delete(request, id14):
-    if request.method=="DELETE":
-        person=Student.objects.get(id=id14)
-        person.delete()
+def Student_delete(request, pk):
+    if request.method != "DELETE":
+        return JsonResponse({"error": "DELETE only"}, status=405)
 
-        return JsonResponse({})
-    return JsonResponse({})
+    student = get_object_or_404(Student, id=pk)
+    student.delete()
 
-
+    return JsonResponse({
+        "message": "Student deleted successfully"
+    })

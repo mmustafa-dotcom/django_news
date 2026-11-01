@@ -1,3 +1,4 @@
+
 {% extends "master.html" %}
 
 {% block content %}
@@ -11,6 +12,10 @@
         {{ student.lastname }}
         - {{ student.age }}
     </p>
+
+{% empty %}
+
+    <p>No students found.</p>
 
 {% endfor %}
 

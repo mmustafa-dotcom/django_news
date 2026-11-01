@@ -1,40 +1,35 @@
+
 from django.urls import path
-from .views import home, details
-from .views1 import users, details1, people_page, students_page
-from . import api_views
+
+from . import views, views1, api_views
 
 
 urlpatterns = [
-    path("home/", home),
-    path("home/<int:id>/", details),
 
-    path("users/", users),
-    path("users/<int:id1>/", details1),
+    # NEWS
+    path("", views.home, name="home"),
+    path("home/", views.home, name="home_page"),
+    path("home/<int:id>/", views.details, name="details"),
 
-    path("people/", people_page),
-    path("students/", students_page),
+    # USERS
+    path("users/", views1.users, name="users"),
+    path("users/<int:id1>/", views1.details1, name="details1"),
 
-    # GET
-    path("api/people/", api_views.people_get),
+    # PEOPLE AND STUDENTS HTML
+    path("people/", views1.people_page, name="people"),
+    path("students/", views1.students_page, name="students"),
 
-    # POST
-    path("api/people/create/", api_views.people_api),
+    # PEOPLE API
+    path("api/people/", api_views.people_get, name="people_get"),
+    path("api/people/create/", api_views.people_api, name="people_create"),
+    path("api/people/<int:pk>/", api_views.person_update, name="person_update"),
+    path("api/people/<int:pk>/change/", api_views.person_change, name="person_change"),
+    path("api/people/<int:pk>/delete/", api_views.person_delete, name="person_delete"),
 
-    # PUT
-    path("api/people/<int:id>/", api_views.person_update),
-
-    # DELETE
-    path("api/people/<int:id1>/delete/", api_views.person_delete),
-
-    # PATCH
-    path("api/people/<int:id3>/change/", api_views.person_change),
-
-    # GET
-    path("api/students/", api_views.Student_list),
-
-    path("api/students/", api_views.Student_list),
-    path("api/students/create/", api_views.Student_create),
-    path("api/students/<int:id11>/", api_views.Student_update),
-    path("api/students/<int:id12>/change/", api_views.Student_change),
-    path("api/students/<int:id14>/delete/", api_views.Student_delete),
+    # STUDENTS API
+    path("api/students/", api_views.Student_list, name="student_list"),
+    path("api/students/create/", api_views.Student_create, name="student_create"),
+    path("api/students/<int:pk>/", api_views.Student_update, name="student_update"),
+    path("api/students/<int:pk>/change/", api_views.Student_change, name="student_change"),
+    path("api/students/<int:pk>/delete/", api_views.Student_delete, name="student_delete"),
 ]

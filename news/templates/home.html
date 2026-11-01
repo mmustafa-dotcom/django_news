@@ -1,3 +1,6 @@
+
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="az">
 
@@ -5,10 +8,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>News Portal</title>
+    <title>OFFSIDEPLUS - News Portal</title>
 
     <style>
-
         * {
             margin: 0;
             padding: 0;
@@ -21,8 +23,6 @@
             color: #222;
         }
 
-        /* HEADER */
-
         header {
             background: #111;
             color: white;
@@ -33,7 +33,6 @@
             max-width: 1200px;
             margin: auto;
             height: 75px;
-
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -42,7 +41,6 @@
         .logo {
             font-size: 32px;
             font-weight: 900;
-            letter-spacing: -1px;
         }
 
         .logo span {
@@ -65,9 +63,6 @@
             color: #e30613;
         }
 
-
-        /* BREAKING NEWS */
-
         .breaking {
             background: #e30613;
             color: white;
@@ -76,9 +71,7 @@
         .breaking-content {
             max-width: 1200px;
             margin: auto;
-
             height: 45px;
-
             display: flex;
             align-items: center;
         }
@@ -86,18 +79,12 @@
         .breaking-title {
             background: #111;
             height: 45px;
-
             padding: 0 20px;
-
             display: flex;
             align-items: center;
-
             font-weight: bold;
             margin-right: 20px;
         }
-
-
-        /* MAIN */
 
         .container {
             max-width: 1200px;
@@ -108,7 +95,6 @@
             display: flex;
             align-items: center;
             gap: 12px;
-
             margin-bottom: 25px;
         }
 
@@ -122,109 +108,68 @@
             background: #e30613;
         }
 
-
-        /* NEWS GRID */
-
         .news-grid {
             display: grid;
-
             grid-template-columns: repeat(3, 1fr);
-
             gap: 22px;
         }
 
-
-        /* CARD */
-
         .news-card {
             background: white;
-
             border-radius: 5px;
-
             overflow: hidden;
-
             box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-
             transition: 0.25s;
         }
 
         .news-card:hover {
             transform: translateY(-6px);
-
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
-
 
         .card-top {
             height: 7px;
             background: #e30613;
         }
 
-
         .card-content {
             padding: 22px;
         }
 
-
         .category {
             color: #e30613;
-
             font-size: 12px;
-
             font-weight: bold;
-
-            text-transform: uppercase;
-
             margin-bottom: 10px;
         }
 
-
         .news-card h2 {
             font-size: 20px;
-
             line-height: 1.3;
-
             margin-bottom: 18px;
         }
 
-
         .details {
             display: inline-block;
-
             background: #111;
-
             color: white;
-
             padding: 10px 18px;
-
             text-decoration: none;
-
             font-size: 13px;
-
             font-weight: bold;
-
             border-radius: 3px;
-
             transition: 0.2s;
         }
-
 
         .details:hover {
             background: #e30613;
         }
 
-
-        /* FOOTER */
-
         footer {
             margin-top: 60px;
-
             background: #111;
-
             color: #aaa;
-
             text-align: center;
-
             padding: 30px;
         }
 
@@ -232,11 +177,7 @@
             color: white;
         }
 
-
-        /* RESPONSIVE */
-
         @media (max-width: 900px) {
-
             .news-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -244,12 +185,9 @@
             .top {
                 padding: 0 20px;
             }
-
         }
 
-
         @media (max-width: 600px) {
-
             .news-grid {
                 grid-template-columns: 1fr;
             }
@@ -265,19 +203,13 @@
             .container {
                 margin: 25px 15px;
             }
-
         }
-
     </style>
-
 </head>
-
 
 <body>
 
-
 <header>
-
     <div class="top">
 
         <div class="logo">
@@ -288,16 +220,16 @@
             <a href="#">Futbol</a>
             <a href="#">Basketbol</a>
             <a href="#">UFC</a>
-            <a href="#">Xəbərlər</a>
+            <a href="{% url 'home' %}">Xəbərlər</a>
+            <a href="{% url 'users' %}">Users</a>
+            <a href="{% url 'people' %}">People</a>
+            <a href="{% url 'students' %}">Students</a>
         </nav>
 
     </div>
-
 </header>
 
-
 <div class="breaking">
-
     <div class="breaking-content">
 
         <div class="breaking-title">
@@ -309,24 +241,16 @@
         </div>
 
     </div>
-
 </div>
-
 
 <main class="container">
 
-
     <div class="section-title">
-
         <div class="red-line"></div>
-
         <h1>Son Xəbərlər</h1>
-
     </div>
 
-
     <div class="news-grid">
-
 
         {% for item in news %}
 
@@ -355,26 +279,21 @@
 
         </article>
 
-        {% endfor %}
+        {% empty %}
 
+        <p>Hələ xəbər yoxdur.</p>
+
+        {% endfor %}
 
     </div>
 
-
 </main>
 
-
 <footer>
-
     <strong>OFFSIDEPLUS</strong>
-
     <br><br>
-
     İdman xəbərləri portalı © 2026
-
 </footer>
 
-
 </body>
-
 </html>
