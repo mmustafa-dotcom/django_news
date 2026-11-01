@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Users</title>
+</head>
+
+<body>
+
+<h1>Users</h1>
+
+{% for user in data1 %}
+
+<p>
+    {{ user.name }} -
+    {{ user.age }} -
+    {{ user.city }}
+
+    <a href="/users/{{ user.id }}/">Details</a>
+
+</p>
+
+{% endfor %}
+
+</body>
+</html>
+
+<li><a href="details/{{ x.id }}">{{ x.firstname }} {{ x.lastname }}</a></li>

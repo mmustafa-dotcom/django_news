@@ -1,0 +1,17 @@
+{% extends "master.html" %}
+
+{% block content %}
+
+<h2>People List</h2>
+
+{% for person in people %}
+
+    <p>
+        {{ person.firstname }}
+        {{ person.lastname }}
+        - {{ person.age }}
+    </p>
+
+{% endfor %}
+
+{% endblock %}
